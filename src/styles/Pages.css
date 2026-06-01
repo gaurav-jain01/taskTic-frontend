@@ -1,0 +1,28 @@
+/* Page Container */
+.page-container {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-container h1 {
+  font-size: 32px;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin: 0 0 10px 0;
+}
+
+.page-container p {
+  color: #666;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 20px;
+  }
+
+  .page-container h1 {
+    font-size: 24px;
+  }
+}
