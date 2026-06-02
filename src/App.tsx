@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
 
 // Pages
 import DashboardLayout from './pages/DashboardLayout';
@@ -11,17 +12,18 @@ import Team from './pages/Team';
 import Chat from './pages/Chat';
 import Assistant from './pages/Assistant';
 import ActivityLogs from './pages/ActivityLogs';
+import Members from './pages/Members';
 
 // Auth pages
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-import './App.css';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toaster position="top-right" />
         <Routes>
           {/* Root path - redirect to login */}
           <Route path="/" element={<Navigate to="/login" replace />} />
@@ -39,6 +41,7 @@ function App() {
             <Route path="/dashboard/chat" element={<Chat />} />
             <Route path="/dashboard/assistant" element={<Assistant />} />
             <Route path="/dashboard/activity-logs" element={<ActivityLogs />} />
+            <Route path="/dashboard/members" element={<Members />} />
           </Route>
 
           {/* 404 Route */}

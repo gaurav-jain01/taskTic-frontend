@@ -1,0 +1,184 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content.team-modal {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.team-modal h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333333;
+  text-align: left;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+  color: #333333;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.member-search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+  color: #333333;
+  font-family: inherit;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+.member-search-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+/* Users List Styles */
+.users-list-container {
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.user-selection-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+}
+
+.user-selection-item:hover {
+  background: #f9f9f9;
+}
+
+.user-selection-item:last-child {
+  border-bottom: none;
+}
+
+.user-selection-item input[type="checkbox"] {
+  margin-right: 1rem;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: #667eea;
+}
+
+.user-selection-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.user-selection-name {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.user-selection-email {
+  font-size: 0.85rem;
+  color: #666666;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-actions .btn-secondary {
+  background: #f8f9fa;
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+.modal-actions .btn-secondary:hover {
+  background: #e9ecef;
+}
+
+.modal-actions .btn-primary {
+  background: #667eea;
+  border: 1px solid #667eea;
+  color: white;
+}
+
+.modal-actions .btn-primary:hover {
+  background: #5a6cd6;
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}

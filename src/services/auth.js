@@ -1,7 +1,40 @@
 // Firebase Authentication Service
 // Configure your Firebase credentials in your environment
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+
+/**
+ * Sync Firebase user with backend
+ */
+export const syncUserWithBackend = async (firebaseUser, idToken) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+        firebaseUid: firebaseUser.uid,
+        idToken // Pass the Firebase ID token for the backend to verify
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Backend sync failed');
+    }
+
+    const data = await response.json();
+    return {
+      user: data.user,
+      token: data.token // The new custom JWT from the backend
+    };
+  } catch (error) {
+    console.error('Backend sync error:', error);
+    throw error;
+  }
+};
 
 /**
  * Login user with email and password

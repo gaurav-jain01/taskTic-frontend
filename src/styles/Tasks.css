@@ -38,36 +38,84 @@
 }
 
 .tasks-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
 .task-card {
-  padding: 15px;
-  border-radius: 8px;
-  background-color: #fff;
+  background: #ffffff;
   border: 1px solid #e0e0e0;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
 }
 
-.task-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-color: #667eea;
+.task-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
 }
 
 .task-card h3 {
-  font-size: 16px;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 6px 0;
+  margin: 0;
 }
 
-.task-card p {
-  margin: 0;
-  color: #666;
-  font-size: 13px;
-  line-height: 1.4;
+.task-status-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-todo {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.badge-progress {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.badge-review {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.badge-done {
+  background: #dcfce3;
+  color: #16a34a;
+}
+
+.task-description {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+  flex-grow: 1;
+}
+
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.task-project, .task-assignee {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Activity Logs Section */
