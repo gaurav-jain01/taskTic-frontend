@@ -30,14 +30,12 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Validate inputs
       if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
         setError('Please fill in all fields');
         setLoading(false);
         return;
       }
 
-      // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.email)) {
         setError('Please enter a valid email address');
@@ -45,31 +43,26 @@ const Register = () => {
         return;
       }
 
-      // Validate password match
       if (formData.password !== formData.confirmPassword) {
         setError('Passwords do not match');
         setLoading(false);
         return;
       }
 
-      // Validate password length
       if (formData.password.length < 6) {
         setError('Password must be at least 6 characters long');
         setLoading(false);
         return;
       }
 
-      // Call register API
       const response = await registerUser(
         formData.email,
         formData.password,
         formData.name
       );
 
-      // Store in auth context
       login(response.user, response.token, response.role);
 
-      // Redirect to dashboard
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.');

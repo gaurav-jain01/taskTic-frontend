@@ -19,10 +19,8 @@ const Login = () => {
     const firebaseToken = await user.getIdToken();
     
     try {
-      // Sync with backend (sends Firebase token, gets Custom Backend token)
       const { user: dbUser, token: backendToken } = await syncUserWithBackend(user, firebaseToken);
 
-      // Create a simplified user object merging Firebase and DB info
       const userData = {
         id: dbUser._id,
         email: dbUser.email,
@@ -32,7 +30,6 @@ const Login = () => {
         teamId: dbUser.teamId || null
       };
 
-      // Store in auth context using the BACKEND token, not Firebase token
       login(userData, backendToken, dbUser.role);
       navigate('/dashboard');
     } catch (err) {
@@ -54,16 +51,12 @@ const Login = () => {
       }
 
       try {
-        // Try standard backend login first
         const response = await loginUser(email, password);
         login(response.user, response.token, response.user.role);
         navigate('/dashboard');
         return;
       } catch (backendError) {
-        // If standard login fails because user registered via Firebase (no password in DB)
-        // or just invalid credentials, we can attempt Firebase fallback
         if (backendError.message.includes('Firebase') || backendError.message === 'Login failed') {
-          // Fallback to Firebase
           const userCredential = await signInWithEmailAndPassword(auth, email, password);
           await handleFirebaseLogin(userCredential);
         } else {
