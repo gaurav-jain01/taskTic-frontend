@@ -3,7 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import toast from 'react-hot-toast';
 import '../styles/CreateTeamModal.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const CreateTeamModal = ({ isOpen, onClose, onSuccess, teamToEdit }) => {
   const { user, token } = useAuth();
@@ -32,7 +32,11 @@ const CreateTeamModal = ({ isOpen, onClose, onSuccess, teamToEdit }) => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${API_URL}/users`);
+      const response = await fetch(`${API_URL}/users`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
       

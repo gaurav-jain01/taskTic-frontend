@@ -11,10 +11,10 @@ const Sidebar = ({ isOpen, onToggle }) => {
     { path: '/dashboard/projects', label: 'Projects', icon: '📁' },
     { path: '/dashboard/tasks', label: 'Tasks', icon: '✓' },
     { path: '/dashboard/team', label: 'Team', icon: '👥' },
-    ...(user?.role === 'admin' ? [{ path: '/dashboard/members', label: 'Members List', icon: '📋' }] : []),
+    { path: '/dashboard/members', label: 'Members List', icon: '📋' },
     { path: '/dashboard/chat', label: 'Chat', icon: '💬' },
     { path: '/dashboard/assistant', label: 'Assistant', icon: '🤖' },
-    { path: '/dashboard/activity-logs', label: 'Activity Logs', icon: '📋' },
+    { path: '/dashboard/activity-logs', label: 'Activity Logs', icon: '📜' },
   ];
 
   const isActive = (path) => location.pathname === path;

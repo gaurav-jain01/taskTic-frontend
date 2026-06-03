@@ -1,7 +1,7 @@
 // Firebase Authentication Service
 // Configure your Firebase credentials in your environment
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 /**
  * Sync Firebase user with backend
@@ -50,7 +50,8 @@ export const loginUser = async (email, password) => {
     });
 
     if (!response.ok) {
-      throw new Error('Login failed');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Login failed');
     }
 
     const data = await response.json();
@@ -75,7 +76,8 @@ export const registerUser = async (email, password, name) => {
     });
 
     if (!response.ok) {
-      throw new Error('Registration failed');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Registration failed');
     }
 
     const data = await response.json();

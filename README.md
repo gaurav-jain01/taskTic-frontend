@@ -1,16 +1,53 @@
-# React + Vite
+# TaskTic - Frontend Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+TaskTic is a modern, responsive web application for seamless task management and team collaboration. This repository contains the frontend React application built with Vite and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Extra Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Interactive Kanban Board**: Drag-and-drop tasks across Todo, In Progress, Review, and Completed stages.
+- **Smart AI Assistant**: A conversational UI that guides users through creating, editing, and managing tasks effortlessly.
+- **Real-Time Team Chat**: Communicate with your team members instantly via WebSocket integration.
+- **Activity Logs**: Track project history with visual timelines of who created or moved tasks.
+- **Role-Based Views**: Dynamic UI that adapts based on user permissions (e.g., hiding deletion tools from standard members).
+- **Mobile Responsive**: Fully responsive layout featuring an auto-hiding side navigation drawer for mobile devices.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React.js with Vite
+- **Styling**: Tailwind CSS & shadcn/ui components
+- **Routing**: React Router DOM
+- **Drag & Drop**: @hello-pangea/dnd
+- **Real-time**: Socket.io-client
 
-## Expanding the ESLint configuration
+## Setup Instructions
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+- Node.js (v16+ recommended)
+- The TaskTic Backend Server running locally.
+
+### Installation
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Environment Variables:**
+   Create a `.env` file in the root directory and configure the API connections:
+   ```env
+   VITE_API_URL=http://localhost:4000/api
+   VITE_SOCKET_URL=http://localhost:4000
+   ```
+
+3. **Start the Development Server:**
+   ```bash
+   npm run dev
+   ```
+   The application will be available at `http://localhost:5173`.
+
+### Building for Production
+To generate a production-ready bundle, run:
+```bash
+npm run build
+```
+The optimized files will be output to the `/dist` directory.

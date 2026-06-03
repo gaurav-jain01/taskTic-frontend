@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Members = () => {
   const { user, token } = useAuth();
@@ -19,13 +19,19 @@ const Members = () => {
   });
 
   useEffect(() => {
-    fetchMembers();
-  }, []);
+    if (token) {
+      fetchMembers();
+    }
+  }, [token]);
 
   const fetchMembers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/users`);
+      const response = await fetch(`${API_URL}/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       const data = await response.json();
       setMembers(data);
@@ -38,7 +44,7 @@ const Members = () => {
 
   const handleUpdateRole = async (userId: string, newRole: string, currentRole: string) => {
     if (!newRole || newRole === currentRole) return;
-    
+
     const validRoles = ['admin', 'manager', 'member'];
     if (!validRoles.includes(newRole.toLowerCase())) {
       toast.error('Invalid role selected.');
@@ -59,7 +65,7 @@ const Members = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update role');
       }
-      
+
       setMembers(members.map(m => (m._id === userId || m.id === userId) ? { ...m, role: newRole.toLowerCase() } : m));
       toast.success('User role updated successfully!');
     } catch (error: any) {
@@ -83,7 +89,7 @@ const Members = () => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to delete user');
       }
-      
+
       setMembers(members.filter(m => m._id !== userId && m.id !== userId));
       toast.success('User deleted successfully!');
     } catch (error: any) {
@@ -177,14 +183,14 @@ const Members = () => {
                   <TableCell className="py-4 px-6 text-slate-600">{member.email}</TableCell>
                   <TableCell className="py-4 px-6">
                     {user?.role === 'admin' ? (
-                      <Select 
-                        value={member.role?.toLowerCase()} 
+                      <Select
+                        value={member.role?.toLowerCase()}
                         onValueChange={(value) => handleUpdateRole(member._id || member.id, value, member.role)}
                       >
                         <SelectTrigger className={`w-32 h-9 border-none shadow-none font-medium
-                          ${member.role === 'admin' ? 'bg-red-50 text-red-500' : 
-                            member.role === 'manager' ? 'bg-amber-50 text-amber-500' : 
-                            'bg-blue-50 text-blue-500'}
+                          ${member.role === 'admin' ? 'bg-red-50 text-red-500' :
+                            member.role === 'manager' ? 'bg-amber-50 text-amber-500' :
+                              'bg-blue-50 text-blue-500'}
                         `}>
                           <SelectValue />
                         </SelectTrigger>
@@ -196,9 +202,9 @@ const Members = () => {
                       </Select>
                     ) : (
                       <span className={`px-4 py-1.5 rounded-full text-sm font-medium
-                        ${member.role === 'admin' ? 'bg-red-50 text-red-500' : 
-                          member.role === 'manager' ? 'bg-amber-50 text-amber-500' : 
-                          'bg-blue-50 text-blue-500'}
+                        ${member.role === 'admin' ? 'bg-red-50 text-red-500' :
+                          member.role === 'manager' ? 'bg-amber-50 text-amber-500' :
+                            'bg-blue-50 text-blue-500'}
                       `}>
                         {member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : ''}
                       </span>
@@ -208,16 +214,16 @@ const Members = () => {
                     {new Date(member.createdAt).toLocaleDateString('en-GB')}
                   </TableCell>
                   {user?.role === 'admin' && (
-                  <TableCell className="py-4 px-6">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => handleDeleteUser(member._id || member.id)}
-                      className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300 font-medium h-9 px-4"
-                    >
-                      Remove
-                    </Button>
-                  </TableCell>
+                    <TableCell className="py-4 px-6">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteUser(member._id || member.id)}
+                        className="border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300 font-medium h-9 px-4"
+                      >
+                        Remove
+                      </Button>
+                    </TableCell>
                   )}
                 </TableRow>
               ))}

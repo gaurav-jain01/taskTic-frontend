@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../services/firebaseAuth';
-import { syncUserWithBackend } from '../services/auth';
+import { syncUserWithBackend, loginUser } from '../services/auth';
 import '../styles/Login.css';
 
 const Login = () => {
@@ -53,10 +53,25 @@ const Login = () => {
         return;
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await handleFirebaseLogin(userCredential);
+      try {
+        // Try standard backend login first
+        const response = await loginUser(email, password);
+        login(response.user, response.token, response.user.role);
+        navigate('/dashboard');
+        return;
+      } catch (backendError) {
+        // If standard login fails because user registered via Firebase (no password in DB)
+        // or just invalid credentials, we can attempt Firebase fallback
+        if (backendError.message.includes('Firebase') || backendError.message === 'Login failed') {
+          // Fallback to Firebase
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          await handleFirebaseLogin(userCredential);
+        } else {
+          throw backendError;
+        }
+      }
     } catch (err) {
-      let errorMessage = 'Login failed. Please try again.';
+      let errorMessage = err.message || 'Login failed. Please try again.';
       if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         errorMessage = 'Invalid email or password.';
       } else if (err.code === 'auth/too-many-requests') {

@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CreateTaskModal.css';
+import { useAuth } from '@/hooks/useAuth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
-const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
+const CreateTaskModal = ({ isOpen, onClose, onSuccess, task, token, isEdit = false }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('todo');
   const [projectId, setProjectId] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
-  
+
   const [projectsList, setProjectsList] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -25,20 +27,49 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
     if (projectId && assignedTo) {
       const selectedProject = projectsList.find((p: any) => p._id === projectId);
       const projectTeamId = selectedProject?.teamId?._id || selectedProject?.teamId;
-      const userStillValid = usersList.some((u: any) => u._id === assignedTo && u.teamId === projectTeamId);
+      const userStillValid = usersList.some((u: any) => u._id === assignedTo && u.teamId?.toString() === projectTeamId?.toString());
       if (!userStillValid) {
         setAssignedTo('');
       }
     }
   }, [projectId, projectsList, usersList]);
 
+  useEffect(() => {
+    if (task && isEdit) {
+      setTitle(task.title || '');
+      setDescription(task.description || '');
+      setStatus(task.status || 'todo');
+      setProjectId(task.projectId?._id || task.projectId || '');
+      setAssignedTo(task.assignedTo?._id || task.assignedTo || '');
+    }
+  }, [task, isEdit]);
+
+  useEffect(() => {
+    if (isOpen && !isEdit) {
+      setTitle('');
+      setDescription('');
+      setStatus('todo');
+      setProjectId('');
+      setAssignedTo('');
+      setError(null);
+    }
+  }, [isOpen, isEdit]);
+
   const fetchData = async () => {
     try {
       const [projectsRes, usersRes] = await Promise.all([
-        fetch(`${API_URL}/projects`),
-        fetch(`${API_URL}/users`)
+        fetch(`${API_URL}/projects`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch(`${API_URL}/users`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
       ]);
-      
+
       if (!projectsRes.ok || !usersRes.ok) {
         throw new Error('Failed to fetch data');
       }
@@ -63,24 +94,30 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
       setError('Please select a user to assign the task to.');
       return;
     }
-    
+
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/tasks`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          title,
-          description,
-          status,
-          projectId,
-          assignedTo
-        })
-      });
+      const response = await fetch(
+        isEdit
+          ? `${API_URL}/tasks/${task._id}`
+          : `${API_URL}/tasks`,
+        {
+          method: isEdit ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title,
+            description,
+            status,
+            projectId,
+            assignedTo
+          })
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -88,9 +125,9 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
       }
 
       const newTask = await response.json();
-      
+
       onSuccess(newTask);
-      
+
       // Reset form
       setTitle('');
       setDescription('');
@@ -99,7 +136,7 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
       setAssignedTo('');
       onClose();
 
-    } catch (err) {
+    } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -111,26 +148,34 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content task-modal">
-        <h2>Assign New Task</h2>
+        <h2>{isEdit ? 'Edit Task' : 'Assign New Task'}</h2>
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Task Title *</label>
-            <input 
-              type="text" 
-              value={title} 
-              onChange={(e) => setTitle(e.target.value)} 
-              required 
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              disabled={
+                isEdit &&
+                user?.role === 'member'
+              }
+              required
               placeholder="E.g., Design Login Page"
             />
           </div>
 
           <div className="form-group">
             <label>Description</label>
-            <textarea 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)} 
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={
+                isEdit &&
+                user?.role === 'member'
+              }
               placeholder="Provide details about the task..."
             />
           </div>
@@ -157,6 +202,7 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
                 required
+                disabled={isEdit}
                 className="task-select-input"
               >
                 <option value="" disabled>Select a project</option>
@@ -175,7 +221,10 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
               required
-              disabled={!projectId}
+              disabled={
+                isEdit &&
+                user?.role === 'member'
+              }
               className="task-select-input"
             >
               <option value="" disabled>
@@ -186,7 +235,10 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
                   if (!projectId) return false;
                   const selectedProject = projectsList.find(p => p._id === projectId);
                   const projectTeamId = selectedProject?.teamId?._id || selectedProject?.teamId;
-                  return user.teamId === projectTeamId;
+                  return (
+                    user.teamId?.toString() ===
+                    projectTeamId?.toString()
+                  );
                 })
                 .map(user => (
                   <option key={user._id} value={user._id}>
@@ -197,12 +249,15 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
             {projectId && usersList.filter(user => {
               const selectedProject = projectsList.find(p => p._id === projectId);
               const projectTeamId = selectedProject?.teamId?._id || selectedProject?.teamId;
-              return user.teamId === projectTeamId;
+              return (
+                user.teamId?.toString() ===
+                projectTeamId?.toString()
+              );
             }).length === 0 && (
-              <span style={{color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block'}}>
-                No users found in this project's team.
-              </span>
-            )}
+                <span style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                  No users found in this project's team.
+                </span>
+              )}
           </div>
 
           <div className="modal-actions">
@@ -210,7 +265,11 @@ const CreateTaskModal = ({ isOpen, onClose, onSuccess }) => {
               Cancel
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Assigning...' : 'Assign Task'}
+              {
+                loading
+                  ? (isEdit ? 'Updating...' : 'Assigning...')
+                  : (isEdit ? 'Update Task' : 'Assign Task')
+              }
             </button>
           </div>
         </form>

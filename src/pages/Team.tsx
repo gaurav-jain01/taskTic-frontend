@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const SVGIcons = {
   teams: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>,
@@ -31,7 +31,7 @@ const getTeamIcon = (name: string, index: number) => {
   if (lower.includes('design') || lower.includes('ux')) return { icon: SVGIcons.paint, color: 'text-purple-500 bg-purple-100' };
   if (lower.includes('devops') || lower.includes('infra')) return { icon: SVGIcons.cloud, color: 'text-red-500 bg-red-100' };
   if (lower.includes('qa') || lower.includes('test')) return { icon: SVGIcons.qa, color: 'text-yellow-500 bg-yellow-100' };
-  
+
   const colors = ['text-blue-500 bg-blue-100', 'text-green-500 bg-green-100', 'text-purple-500 bg-purple-100', 'text-yellow-500 bg-yellow-100', 'text-red-500 bg-red-100'];
   return { icon: SVGIcons.teams, color: colors[index % colors.length] };
 };
@@ -45,7 +45,7 @@ const Team = () => {
   const [viewingTeam, setViewingTeam] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
-  
+
   // Calculate summary stats
   const totalTeams = teams.length;
   let totalMembers = 0;
@@ -63,13 +63,19 @@ const Team = () => {
   });
 
   useEffect(() => {
-    fetchTeams();
-  }, []);
+    if (token) {
+      fetchTeams();
+    }
+  }, [token]);
 
   const fetchTeams = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/teams`);
+      const response = await fetch(`${API_URL}/teams`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error('Failed to fetch teams');
       const data = await response.json();
       setTeams(data);
@@ -95,7 +101,7 @@ const Team = () => {
         const errData = await response.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to delete team');
       }
-      
+
       setTeams(teams.filter(t => t._id !== teamId));
       toast.success('Team deleted successfully!');
     } catch (error: any) {
@@ -104,8 +110,8 @@ const Team = () => {
     }
   };
 
-  const filteredTeams = teams.filter(team => 
-    team.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredTeams = teams.filter(team =>
+    team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (team.description && team.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -116,8 +122,8 @@ const Team = () => {
           <h1 className="text-[28px] font-bold text-slate-900 tracking-tight">Teams</h1>
           <p className="text-sm text-slate-500 mt-1 font-medium">Manage your teams and their members</p>
         </div>
-        {(user?.role === 'admin' || user?.role === 'manager') && (
-          <Button 
+        {user?.role === 'admin' && (
+          <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 font-medium px-4 h-10 rounded-lg shadow-none"
           >
@@ -126,16 +132,16 @@ const Team = () => {
         )}
       </div>
 
-      <CreateTeamModal 
-        isOpen={isModalOpen || !!editingTeam} 
+      <CreateTeamModal
+        isOpen={isModalOpen || !!editingTeam}
         teamToEdit={editingTeam}
         onClose={() => {
           setIsModalOpen(false);
           setEditingTeam(null);
-        }} 
+        }}
         onSuccess={() => {
           fetchTeams();
-        }} 
+        }}
       />
 
       <ViewTeamModal
@@ -169,14 +175,14 @@ const Team = () => {
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             {SVGIcons.search}
           </div>
-          <Input 
+          <Input
             className="pl-10 h-10 border-slate-200 shadow-sm focus-visible:ring-1 focus-visible:ring-slate-300 rounded-lg bg-white"
-            placeholder="Search teams..." 
+            placeholder="Search teams..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         {/* Placeholder for Filter & Sort as per UI */}
         <div className="hidden md:flex gap-4 flex-1">
           <div className="h-10 px-4 border border-slate-200 rounded-lg flex items-center justify-between bg-white text-sm text-slate-600 shadow-sm min-w-[140px] cursor-not-allowed opacity-70">
@@ -188,17 +194,17 @@ const Team = () => {
         </div>
 
         <div className="flex gap-2 ml-auto shrink-0 bg-slate-50 p-1 rounded-lg border border-slate-100">
-          <Button 
+          <Button
             variant="ghost"
-            size="sm" 
+            size="sm"
             onClick={() => setViewMode('grid')}
             className={`h-8 w-10 px-0 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm border border-slate-200 text-blue-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
           >
             {SVGIcons.grid}
           </Button>
-          <Button 
+          <Button
             variant="ghost"
-            size="sm" 
+            size="sm"
             onClick={() => setViewMode('list')}
             className={`h-8 w-10 px-0 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm border border-slate-200 text-blue-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
           >
@@ -228,13 +234,13 @@ const Team = () => {
             const members = team.members || [];
             const displayMembers = members.slice(0, 3);
             const remainingCount = members.length - 3;
-            
+
             // Derive pill color from icon color roughly
-            const pillColor = color.includes('blue') ? 'bg-blue-50 text-blue-500' : 
-                              color.includes('green') || color.includes('emerald') ? 'bg-emerald-50 text-emerald-500' : 
-                              color.includes('purple') ? 'bg-purple-50 text-purple-500' :
-                              color.includes('amber') || color.includes('yellow') ? 'bg-amber-50 text-amber-500' :
-                              color.includes('red') ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500';
+            const pillColor = color.includes('blue') ? 'bg-blue-50 text-blue-500' :
+              color.includes('green') || color.includes('emerald') ? 'bg-emerald-50 text-emerald-500' :
+                color.includes('purple') ? 'bg-purple-50 text-purple-500' :
+                  color.includes('amber') || color.includes('yellow') ? 'bg-amber-50 text-amber-500' :
+                    color.includes('red') ? 'bg-red-50 text-red-500' : 'bg-slate-100 text-slate-500';
 
             return (
               <div key={team._id} className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col">
@@ -254,13 +260,13 @@ const Team = () => {
                     {members.length} Members
                   </div>
                 </div>
-                
+
                 <div className="flex -space-x-3 mb-6">
                   {displayMembers.length > 0 ? (
                     displayMembers.map((member: any, i: number) => (
-                      <img 
+                      <img
                         key={member._id || i}
-                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&color=fff&bold=true`} 
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random&color=fff&bold=true`}
                         alt={member.name}
                         className="w-10 h-10 rounded-full border-2 border-white object-cover bg-slate-100"
                         title={member.name}
@@ -275,18 +281,18 @@ const Team = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex gap-3 mt-auto pt-5 border-t border-slate-100">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="flex-1 h-9 border-blue-200 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 font-medium"
                     onClick={() => setViewingTeam(team)}
                   >
                     View Team
                   </Button>
-                  {(user?.role === 'admin' || user?.role === 'manager') && (
-                    <Button 
-                      variant="outline" 
+                  {user?.role === 'admin' && (
+                    <Button
+                      variant="outline"
                       className="flex-1 h-9 border-amber-200 text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300 font-medium"
                       onClick={() => setEditingTeam(team)}
                     >
@@ -294,8 +300,8 @@ const Team = () => {
                     </Button>
                   )}
                   {user?.role === 'admin' && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="flex-1 h-9 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300 font-medium"
                       onClick={() => handleDeleteTeam(team._id)}
                     >

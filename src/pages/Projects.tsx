@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import toast from 'react-hot-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 const SVGIcons = {
   projects: <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>,
@@ -60,9 +60,14 @@ const Projects = () => {
   const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
-    fetchProjects();
-    fetchTeams();
-  }, []);
+    if (token) {
+      fetchProjects();
+      fetchTeams();
+      if (role !== 'admin') {
+        setViewMode('list');
+      }
+    }
+  }, [token, role]);
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -130,12 +135,12 @@ const Projects = () => {
     }
   };
 
-  const canCreate = role === 'admin' || role === 'manager';
+  const canCreate = role === 'admin';
 
   const uniqueTeamsCount = new Set(projects.map(p => p.teamId?._id).filter(Boolean)).size;
 
-  const filteredProjects = projects.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredProjects = projects.filter(p =>
+    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -147,7 +152,7 @@ const Projects = () => {
           <p className="text-sm text-slate-500 mt-1 font-medium">Manage and organize all your projects in one place.</p>
         </div>
         {canCreate && (
-          <Button 
+          <Button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 font-medium px-4 h-10 rounded-lg shadow-none"
           >
@@ -156,19 +161,19 @@ const Projects = () => {
         )}
       </div>
 
-      <CreateProjectModal 
-        isOpen={isModalOpen || !!editingProject} 
+      <CreateProjectModal
+        isOpen={isModalOpen || !!editingProject}
         projectToEdit={editingProject}
         onClose={() => {
           setIsModalOpen(false);
           setEditingProject(null);
-        }} 
+        }}
         onSuccess={() => {
           fetchProjects();
-        }} 
+        }}
       />
 
-      <ViewTeamModal 
+      <ViewTeamModal
         isOpen={!!viewingTeam}
         onClose={() => setViewingTeam(null)}
         team={viewingTeam}
@@ -186,16 +191,19 @@ const Projects = () => {
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center gap-5">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-500 bg-emerald-50">
-            {SVGIcons.teams}
+
+        {role === 'admin' && (
+          <div className="bg-white border border-slate-200 rounded-xl p-6 flex items-center gap-5">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-emerald-500 bg-emerald-50">
+              {SVGIcons.teams}
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-slate-600">Teams Assigned</span>
+              <span className="text-2xl font-bold text-slate-900 my-0.5">{uniqueTeamsCount}</span>
+              <span className="text-xs font-medium text-slate-500">Total Teams</span>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-slate-600">Teams Assigned</span>
-            <span className="text-2xl font-bold text-slate-900 my-0.5">{uniqueTeamsCount}</span>
-            <span className="text-xs font-medium text-slate-500">Total Teams</span>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 items-center bg-white p-4 rounded-xl border border-slate-200">
@@ -203,14 +211,14 @@ const Projects = () => {
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
             {SVGIcons.search}
           </div>
-          <Input 
+          <Input
             className="pl-10 h-10 border-slate-200 shadow-sm focus-visible:ring-1 focus-visible:ring-slate-300 rounded-lg bg-white"
-            placeholder="Search projects..." 
+            placeholder="Search projects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        
+
         <div className="hidden md:flex gap-4 flex-1">
           <div className="h-10 px-4 border border-slate-200 rounded-lg flex items-center justify-between bg-white text-sm text-slate-600 shadow-sm min-w-[160px] cursor-not-allowed opacity-70">
             Filter by team <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -218,17 +226,17 @@ const Projects = () => {
         </div>
 
         <div className="flex gap-2 ml-auto shrink-0 bg-slate-50 p-1 rounded-lg border border-slate-100">
-          <Button 
+          <Button
             variant="ghost"
-            size="sm" 
+            size="sm"
             onClick={() => setViewMode('grid')}
             className={`h-8 w-10 px-0 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm border border-slate-200 text-blue-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
           >
             {SVGIcons.grid}
           </Button>
-          <Button 
+          <Button
             variant="ghost"
-            size="sm" 
+            size="sm"
             onClick={() => setViewMode('list')}
             className={`h-8 w-10 px-0 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm border border-slate-200 text-blue-600' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'}`}
           >
@@ -256,7 +264,7 @@ const Projects = () => {
           {filteredProjects.map((project, idx) => {
             const { icon, color } = getProjectIcon(project.name, idx);
             const teamName = project.teamId?.name || 'Unassigned';
-            
+
             return (
               <div key={project._id} className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col">
                 <div className="flex items-start gap-4 mb-4 relative">
@@ -272,42 +280,48 @@ const Projects = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="mb-5 flex">
                   <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-600 border border-blue-100">
                     {SVGIcons.teamSmall}
                     {teamName}
                   </span>
                 </div>
-                
+
                 <div className="flex flex-col gap-1.5 mb-6 text-[13px] text-slate-500 font-medium">
                   <div className="flex items-center">
                     {SVGIcons.calendar} Created: {formatDate(project.createdAt)}
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3 mt-auto pt-4 border-t border-slate-100">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     onClick={() => handleViewTeam(project.teamId)}
-                    className="flex-1 h-9 border-blue-200 text-blue-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 font-medium text-sm px-0"
+                    className="flex-1 h-9 border-blue-200 text-blue-500"
                   >
                     View
                   </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => setEditingProject(project)}
-                    className="flex-1 h-9 border-amber-200 text-amber-500 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-300 font-medium text-sm px-0"
-                  >
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handleDeleteProject(project._id)}
-                    className="flex-1 h-9 border-red-200 text-red-500 hover:bg-red-50 hover:text-red-600 hover:border-red-300 font-medium text-sm px-0"
-                  >
-                    Delete
-                  </Button>
+
+                  {role === 'admin' && (
+                    <>
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditingProject(project)}
+                        className="flex-1 h-9 border-amber-200 text-amber-500"
+                      >
+                        Edit
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDeleteProject(project._id)}
+                        className="flex-1 h-9 border-red-200 text-red-500"
+                      >
+                        Delete
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             );
