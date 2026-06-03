@@ -38,6 +38,7 @@ const Chat = () => {
   }, [role, user]);
 
   const fetchMyTeam = async () => {
+    setLoading(true);
     try {
       const response = await fetch(
         `${API_URL}/teams/${user.teamId}`,
@@ -54,6 +55,8 @@ const Chat = () => {
       }
     } catch (err) {
       console.error("Failed to fetch team", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -194,6 +197,14 @@ const Chat = () => {
   }
 
   if (!selectedTeam) {
+    if (loading) {
+      return (
+        <div className="w-full flex items-center justify-center p-8 min-h-[calc(100vh-80px)] bg-[#FAFAFA]">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      );
+    }
+
     return (
       <div className="w-full flex items-center justify-center p-8 min-h-[calc(100vh-80px)] bg-[#FAFAFA]">
         <div className="text-center max-w-sm">
