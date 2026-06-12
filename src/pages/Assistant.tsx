@@ -54,6 +54,7 @@ const Assistant = () => {
 
   const [step, setStep] = useState('INITIAL');
   const [contextData, setContextData] = useState<any>({});
+  const contextDataRef = useRef<any>({});
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -135,6 +136,7 @@ const Assistant = () => {
   const showInitialOptions = () => {
     setStep('INITIAL');
     setContextData({});
+    contextDataRef.current = {};
     
     const options: Option[] = [];
     
@@ -158,7 +160,8 @@ const Assistant = () => {
   };
 
   const handleCreateTitleSubmit = (title: string) => {
-    setContextData(prev => ({ ...prev, title }));
+    contextDataRef.current.title = title;
+    setContextData({ ...contextDataRef.current });
     setStep('CREATE_PROJECT');
     
     if (projects.length === 0) {
@@ -178,7 +181,8 @@ const Assistant = () => {
   };
 
   const handleCreateProjectSelect = (projectId: string, projectName: string) => {
-    setContextData(prev => ({ ...prev, projectId }));
+    contextDataRef.current.projectId = projectId;
+    setContextData({ ...contextDataRef.current });
     setStep('CREATE_USER');
 
     const project = projects.find(p => p._id === projectId);
@@ -203,7 +207,7 @@ const Assistant = () => {
   };
 
   const handleCreateUserSelect = async (userId: string, userName: string) => {
-    const finalData = { ...contextData, assignedTo: userId || null };
+    const finalData = { ...contextDataRef.current, assignedTo: userId || null };
     setLoading(true);
     
     try {
@@ -269,7 +273,8 @@ const Assistant = () => {
   };
 
   const handleEditTaskSelect = (task: any) => {
-    setContextData(prev => ({ ...prev, selectedTask: task }));
+    contextDataRef.current.selectedTask = task;
+    setContextData({ ...contextDataRef.current });
     setStep('EDIT_ACTION');
     
     const options: Option[] = [
